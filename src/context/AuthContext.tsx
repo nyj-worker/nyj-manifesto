@@ -8,6 +8,7 @@ import {
   transitionClientProject,
   getClientPublicStats,
   getClientPublicProjects,
+  getClientAuditLogs,
   initClientStorage
 } from '../services/clientStorage.ts';
 import { SEED_USERS } from '../../server/seed_data.ts';
@@ -72,6 +73,15 @@ async function handleClientFallback(url: string, options: RequestInit = {}, curr
     const body = options.body ? JSON.parse(options.body as string) : {};
     const updated = transitionClientProject(id, body.action, body.comment, body.rejectReason, currentUser);
     return new Response(JSON.stringify({ success: true, project: updated }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  // 6-1. 감사 로그
+  if (cleanUrl === '/api/admin/audit-logs') {
+    const logs = getClientAuditLogs();
+    return new Response(JSON.stringify({ logs }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });

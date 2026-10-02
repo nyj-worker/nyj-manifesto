@@ -94,16 +94,64 @@ export function initClientStorage() {
       STORAGE_KEYS.AUDIT_LOGS,
       JSON.stringify([
         {
-          id: 'init_log',
-          actor_name: '시스템',
+          id: 'log_01',
+          actor_name: '김정책',
+          actor_role: 'POLICY_ADMIN',
+          action: 'PUBLISH',
+          target_type: 'PROJECT',
+          target_id: 'proj_4_01',
+          details: '김정책(정책기획과) [4-01 9호선 조기 착공 및 적기 개통] 사업 시민 포털 공식 게시 승인',
+          timestamp: '2026-09-30T10:15:00.000Z'
+        },
+        {
+          id: 'log_02',
+          actor_name: '박교통',
+          actor_role: 'BUREAU_ADMIN',
+          action: 'BUREAU_APPROVE',
+          target_type: 'PROJECT',
+          target_id: 'proj_4_01',
+          details: '박교통(교통국장) 소관 [4-01] 2026년 추진실적 국 검토 완료 및 정책팀 송부',
+          timestamp: '2026-09-28T14:30:00.000Z'
+        },
+        {
+          id: 'log_03',
+          actor_name: '김교통',
+          actor_role: 'DEPT_USER',
+          action: 'SUBMIT',
+          target_type: 'PROJECT',
+          target_id: 'proj_4_01',
+          details: '김교통(교통정책과) [4-01] 2026년 실시설계 착수 실적 입력 및 국 검토 제출',
+          timestamp: '2026-09-27T09:00:00.000Z'
+        },
+        {
+          id: 'log_04',
+          actor_name: '박대중',
+          actor_role: 'DEPT_USER',
+          action: 'UPDATE_PROJECT',
+          target_type: 'PROJECT',
+          target_id: 'proj_4_14',
+          details: '박대중(대중교통과) [4-14 남양주형 똑버스 DRT] 1권역 시범운영 계획 실적 수정 저장',
+          timestamp: '2026-09-26T16:20:00.000Z'
+        },
+        {
+          id: 'log_05',
+          actor_name: '최관리',
           actor_role: 'SYS_ADMIN',
           action: 'INIT_SYSTEM',
-          details: '민선9기 공약 실천계획 시스템 Vercel 환경 초기화 완료',
-          timestamp: new Date().toISOString()
+          target_type: 'SYSTEM',
+          target_id: 'ALL',
+          details: '민선9기 공약 실천계획 통합관리 시스템 가동 및 16개 핵심 사업 적재 완료',
+          timestamp: '2026-09-25T08:00:00.000Z'
         }
       ])
     );
   }
+}
+
+export function getClientAuditLogs() {
+  initClientStorage();
+  const raw = localStorage.getItem(STORAGE_KEYS.AUDIT_LOGS);
+  return raw ? JSON.parse(raw) : [];
 }
 
 /**

@@ -126,7 +126,7 @@ router.get('/projects', (req: Request, res: Response) => {
   const params: any[] = [];
 
   if (dong && dong !== '전체') {
-    query += ' AND json_extract(location, "$.dong") = ?';
+    query += " AND json_extract(location, '$.dong') = ?";
     params.push(dong);
   }
 

@@ -33,6 +33,9 @@ const AppContent: React.FC = () => {
   const [publicTab, setPublicTab] = useState<string>('public-home');
   const [publicSelectedProjectId, setPublicSelectedProjectId] = useState<string>('proj_4_01');
 
+  // 전환 완료 피드백 알림 배너 상태
+  const [noticeMessage, setNoticeMessage] = useState<string | null>(null);
+
   // 대기 건수 배지 주기적 로드
   useEffect(() => {
     if (portalMode === 'admin') {
@@ -57,13 +60,51 @@ const AppContent: React.FC = () => {
     if (projectId) setPublicSelectedProjectId(projectId);
   };
 
+  // 역할 빠른 전환 시연 성공 콜백 처리
+  const handleRoleSwitchSuccess = (userId: string, targetTab: string, defaultProjectId?: string) => {
+    if (userId === 'user_citizen') {
+      setPublicTab(targetTab || 'public-home');
+      setNoticeMessage('일반 시민 모드로 전환되었습니다. 공개된 공약사업을 자유롭게 열람하실 수 있습니다.');
+    } else {
+      setAdminTab(targetTab || 'projects');
+      if (defaultProjectId) {
+        setAdminSelectedProjectId(defaultProjectId);
+      }
+      setNoticeMessage(`시연 모드 접속 성공: 해당 담당자(${targetTab === 'projects' ? '공약사업 관리' : targetTab === 'approvals' ? '검토·승인함' : '관리'}) 기능이 즉시 활성화되었습니다.`);
+    }
+
+    // 4초 후 알림 자동 숨김
+    setTimeout(() => {
+      setNoticeMessage(null);
+    }, 4000);
+  };
+
   return (
-    <div className="min-h-screen flex flex-col font-sans">
+    <div className="min-h-screen flex flex-col font-sans relative">
       {/* 1. 최상단 데모 역할 빠른 전환 바 */}
-      <RoleSwitcher />
+      <RoleSwitcher onRoleSwitchSuccess={handleRoleSwitchSuccess} />
 
       {/* 2. 남양주시 메인 헤더 (지자체 브랜딩 및 포털 모드 전환) */}
       <Header />
+
+      {/* 시연 기능 작동 안내 토스트 알림 */}
+      {noticeMessage && (
+        <div className="bg-emerald-600 text-white text-xs font-bold py-2.5 px-4 shadow-md flex items-center justify-between animate-in slide-in-from-top duration-300">
+          <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
+            <span className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+              {noticeMessage}
+            </span>
+            <button
+              type="button"
+              onClick={() => setNoticeMessage(null)}
+              className="text-white/80 hover:text-white text-xs ml-4"
+            >
+              ✕ 닫기
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* 3. 모드별 메인 콘텐츠 */}
       {portalMode === 'admin' ? (

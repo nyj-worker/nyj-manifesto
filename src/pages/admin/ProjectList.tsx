@@ -43,8 +43,22 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onNavigate, initialSel
   const [detailTab, setDetailTab] = useState<'overview' | 'finance' | 'issues' | 'schedule' | 'history'>('overview');
 
   useEffect(() => {
+    if (currentUser.role === 'DEPT_USER' && currentUser.departmentName) {
+      setSelectedDept(currentUser.departmentName);
+    } else {
+      setSelectedDept('전체');
+    }
     loadProjects();
   }, [currentUser]);
+
+  useEffect(() => {
+    if (initialSelectedId && projects.length > 0) {
+      const found = projects.find(p => p.id === initialSelectedId);
+      if (found) {
+        loadProjectDetail(found.id);
+      }
+    }
+  }, [initialSelectedId, projects]);
 
   const loadProjects = async () => {
     try {
@@ -54,7 +68,6 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onNavigate, initialSel
         const data = await res.json();
         setProjects(data.projects);
 
-        // 초기 선택 프로젝트 지정
         if (initialSelectedId) {
           const found = data.projects.find((p: PromiseProject) => p.id === initialSelectedId);
           if (found) loadProjectDetail(found.id);
