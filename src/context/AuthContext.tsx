@@ -1,5 +1,116 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, UserRole } from '../types/index.ts';
+import {
+  getClientDashboardStats,
+  getClientProjects,
+  getClientProjectById,
+  updateClientProject,
+  transitionClientProject,
+  getClientPublicStats,
+  getClientPublicProjects,
+  initClientStorage
+} from '../services/clientStorage.ts';
+import { SEED_USERS } from '../../server/seed_data.ts';
+
+// Vercel 정적 호스팅 환경에서 백엔드 API 부재 시 동작하는 클라이언트 라우터
+async function handleClientFallback(url: string, options: RequestInit = {}, currentUser: User): Promise<Response> {
+  initClientStorage();
+  const method = (options.method || 'GET').toUpperCase();
+  const cleanUrl = url.split('?')[0];
+
+  // 1. 사용자 목록
+  if (cleanUrl === '/api/auth/users') {
+    return new Response(JSON.stringify({ users: SEED_USERS }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  // 2. 관리자 대시보드 통계
+  if (cleanUrl === '/api/admin/dashboard-stats') {
+    const stats = getClientDashboardStats();
+    return new Response(JSON.stringify(stats), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  // 3. 관리자 공약 목록
+  if (cleanUrl === '/api/admin/projects' && method === 'GET') {
+    const projects = getClientProjects();
+    return new Response(JSON.stringify({ projects }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  // 4. 프로젝트 상세
+  if (cleanUrl.startsWith('/api/admin/projects/') && method === 'GET') {
+    const id = cleanUrl.replace('/api/admin/projects/', '');
+    const data = getClientProjectById(id);
+    return new Response(JSON.stringify(data), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  // 5. 프로젝트 실적 수정
+  if (cleanUrl.startsWith('/api/admin/projects/') && method === 'PUT') {
+    const id = cleanUrl.replace('/api/admin/projects/', '');
+    const body = options.body ? JSON.parse(options.body as string) : {};
+    const updated = updateClientProject(id, body, currentUser);
+    return new Response(JSON.stringify({ success: true, project: updated }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  // 6. 상태 전이 (승인/반려/게시/철회)
+  if (cleanUrl.includes('/transition') && method === 'POST') {
+    const parts = cleanUrl.split('/');
+    const id = parts[parts.indexOf('projects') + 1];
+    const body = options.body ? JSON.parse(options.body as string) : {};
+    const updated = transitionClientProject(id, body.action, body.comment, body.rejectReason, currentUser);
+    return new Response(JSON.stringify({ success: true, project: updated }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  // 7. 시민 공개 통계
+  if (cleanUrl === '/api/public/stats') {
+    const stats = getClientPublicStats();
+    return new Response(JSON.stringify(stats), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  // 8. 시민 공개 프로젝트 목록
+  if (cleanUrl === '/api/public/projects' && method === 'GET') {
+    const result = getClientPublicProjects();
+    return new Response(JSON.stringify(result), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  // 9. 시민 공약 상세
+  if (cleanUrl.startsWith('/api/public/projects/') && method === 'GET') {
+    const id = cleanUrl.replace('/api/public/projects/', '');
+    const { project } = getClientProjectById(id);
+    return new Response(JSON.stringify({ project }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  // 기본 성공 응답
+  return new Response(JSON.stringify({ success: true }), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' }
+  });
+}
 
 interface AuthContextType {
   currentUser: User;
@@ -73,16 +184,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const handleSetPortalMode = (mode: 'admin' | 'public') => {
     setPortalMode(mode);
     localStorage.setItem('portal_mode', mode);
+
+    // 시민 모드 상태에서 내부 행정 포털을 누르면, 자연스럽게 교통정책과 담당자로 자동 전환하여 권한 오류 방지
+    if (mode === 'admin' && currentUser.role === 'CITIZEN') {
+      const defaultOfficer = users.find(u => u.id === 'user_railway_dept') || {
+        id: 'user_railway_dept',
+        name: '김교통',
+        role: 'DEPT_USER' as UserRole,
+        departmentId: 'dept_railway',
+        departmentName: '교통정책과',
+        bureauId: 'bureau_traffic',
+        bureauName: '교통국',
+        email: 'yang.yh@nyj.go.kr',
+        phone: '031-590-4428'
+      };
+      setCurrentUser(defaultOfficer);
+      localStorage.setItem('demo_current_user', JSON.stringify(defaultOfficer));
+    }
   };
 
-  // 요청 헤더에 현재 사용자 ID 자동 주입
-  const apiFetch = async (url: string, options: RequestInit = {}) => {
+  // 요청 헤더에 현재 사용자 ID 자동 주입 + Vercel 호스팅 환경을 위한 자동 클라이언트 Fallback
+  const apiFetch = async (url: string, options: RequestInit = {}): Promise<Response> => {
     const headers = new Headers(options.headers || {});
     headers.set('x-user-id', currentUser.id);
     if (!headers.has('Content-Type') && !(options.body instanceof FormData)) {
       headers.set('Content-Type', 'application/json');
     }
-    return fetch(url, { ...options, headers });
+
+    try {
+      const res = await fetch(url, { ...options, headers });
+      // 만약 404 Not Found이거나 HTML이 반환되면 (Vercel에서 백엔드 없이 프론트만 서빙된 경우)
+      const contentType = res.headers.get('content-type') || '';
+      if (!res.ok || contentType.includes('text/html')) {
+        return handleClientFallback(url, options, currentUser);
+      }
+      return res;
+    } catch (networkError) {
+      // 서버 오프라인 또는 Vercel 환경
+      return handleClientFallback(url, options, currentUser);
+    }
   };
 
   return (

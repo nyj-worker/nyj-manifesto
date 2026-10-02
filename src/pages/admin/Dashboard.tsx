@@ -12,6 +12,8 @@ import {
   Building
 } from 'lucide-react';
 
+import { getClientDashboardStats } from '../../services/clientStorage.ts';
+
 interface DashboardStats {
   totalCount: number;
   executionStats: Record<string, number>;
@@ -69,9 +71,13 @@ export const Dashboard: React.FC<{ onNavigate: (tab: string, projectId?: string)
       if (res.ok) {
         const data = await res.json();
         setStats(data);
+      } else {
+        // Vercel 등 백엔드 통신 오류 시 즉시 클라이언트 데이터로 안전 복구
+        setStats(getClientDashboardStats());
       }
     } catch (err) {
-      console.error('대시보드 통계 로드 실패:', err);
+      console.warn('백엔드 대시보드 통계 로드 실패, 클라이언트 스토리지로 복구합니다:', err);
+      setStats(getClientDashboardStats());
     } finally {
       setLoading(false);
     }

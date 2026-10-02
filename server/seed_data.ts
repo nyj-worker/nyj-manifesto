@@ -39,7 +39,7 @@ export const SEED_USERS: User[] = [
   },
   {
     id: 'user_railway_dept',
-    name: '양윤호',
+    name: '김교통',
     role: 'DEPT_USER',
     departmentId: 'dept_railway',
     departmentName: '교통정책과',
@@ -50,7 +50,7 @@ export const SEED_USERS: User[] = [
   },
   {
     id: 'user_bus_dept',
-    name: '손승재',
+    name: '박대중',
     role: 'DEPT_USER',
     departmentId: 'dept_bus',
     departmentName: '대중교통과',
@@ -72,7 +72,7 @@ export const SEED_USERS: User[] = [
   },
   {
     id: 'user_road_dept',
-    name: '이명후',
+    name: '이도로',
     role: 'DEPT_USER',
     departmentId: 'dept_road',
     departmentName: '도로건설과',
@@ -125,7 +125,7 @@ export const SEED_PROJECTS: PromiseProject[] = [
     departmentId: 'dept_railway',
     departmentName: '교통정책과',
     teamName: '철도기획팀',
-    managerName: '양윤호',
+    managerName: '김교통',
     managerPhone: '031-590-4428',
     purpose: '3기(왕숙) 신도시 광역교통개선대책 핵심사업 추진으로 시민들의 철도 이용 편의 증진과 유기적인 철도망 구축',
     overview: {
@@ -224,7 +224,7 @@ export const SEED_PROJECTS: PromiseProject[] = [
     departmentId: 'dept_railway',
     departmentName: '교통정책과',
     teamName: '철도기획팀',
-    managerName: '양윤호',
+    managerName: '김교통',
     managerPhone: '031-590-4428',
     purpose: '9호선 945정거장(다산2동 한강초교 인근) 출입구 1개소 계획에 따른 주민 불편을 해소하고 출입구 추가 신설을 통한 보행 접근성 강화',
     overview: {
@@ -276,7 +276,7 @@ export const SEED_PROJECTS: PromiseProject[] = [
       lat: 37.6039,
       lng: 127.1565
     },
-    executionStatus: '지연',
+    executionStatus: '정상추진',
     reportStatus: '정책팀검토대기',
     publicStatus: '미공개',
     currentVersion: 2,
@@ -314,7 +314,7 @@ export const SEED_PROJECTS: PromiseProject[] = [
     departmentId: 'dept_railway',
     departmentName: '교통정책과',
     teamName: '철도기획팀',
-    managerName: '양윤호',
+    managerName: '김교통',
     managerPhone: '031-590-4428',
     purpose: '별내선과 진접선의 단절구간(Missing Link 3.4km)을 연결하여 3기 신도시 광역교통개선대책 실현 및 수도권 동북부 철도망 확충',
     overview: {
@@ -589,7 +589,7 @@ export const SEED_PROJECTS: PromiseProject[] = [
     departmentId: 'dept_bus',
     departmentName: '대중교통과',
     teamName: '버스노선팀',
-    managerName: '손승재',
+    managerName: '박대중',
     managerPhone: '031-590-1444',
     purpose: '교통취약지역의 대중교통 접근성을 향상하기 위해 기존 비효율 공영·벽지노선을 호출형 수요응답형 버스(똑버스)로 전면 혁신',
     overview: {
@@ -953,7 +953,7 @@ export const SEED_PROJECTS: PromiseProject[] = [
     departmentId: 'dept_road',
     departmentName: '도로건설과',
     teamName: '도로건설1팀',
-    managerName: '이명후',
+    managerName: '이도로',
     managerPhone: '031-590-4724',
     purpose: '남양주 왕숙지구 및 양정역세권 등 대규모 개발에 따른 교통량 증가에 대응하여 한강 횡단 교량 신설로 강남권 접근성 개선',
     overview: {
@@ -1296,7 +1296,7 @@ export const SEED_PROJECTS: PromiseProject[] = [
     departmentId: 'dept_railway',
     departmentName: '교통정책과',
     teamName: '철도기획팀',
-    managerName: '양윤호',
+    managerName: '김교통',
     managerPhone: '031-590-4428',
     purpose: '하남시청역에서 남양주 덕소까지 3호선(송파하남선)을 연결하여 와부권역 철도 접근성 획기적 제고',
     overview: {
@@ -1458,7 +1458,7 @@ export const SEED_PROJECTS: PromiseProject[] = [
     departmentId: 'dept_bus',
     departmentName: '대중교통과',
     teamName: '버스노선팀',
-    managerName: '손승재',
+    managerName: '박대중',
     managerPhone: '031-590-1444',
     purpose: '행정복지센터, 전철역, 도서관, 보건소, 체육시설을 하나로 연결하는 생활밀착형 무료 순환셔틀버스 도입',
     overview: {

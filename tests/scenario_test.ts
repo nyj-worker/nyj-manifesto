@@ -54,7 +54,7 @@ async function runScenarioTests() {
   const users = db.prepare('SELECT * FROM users').all() as any[];
   const railwayUser: User = {
     id: 'user_railway_dept',
-    name: '양윤호',
+    name: '김교통',
     role: 'DEPT_USER',
     departmentId: 'dept_railway',
     departmentName: '교통정책과',
@@ -65,7 +65,7 @@ async function runScenarioTests() {
 
   const roadUser: User = {
     id: 'user_road_dept',
-    name: '이명후',
+    name: '이도로',
     role: 'DEPT_USER',
     departmentId: 'dept_road',
     departmentName: '도로건설과',
@@ -116,7 +116,7 @@ async function runScenarioTests() {
     1,
     '담당자가 배정된 사업을 작성하고 제출할 수 있는가?',
     canEditMyProj === true,
-    `교통정책과 양윤호 담당자가 소관 4-01(9호선 조기착공) 사업 수정 권한을 정상 승인받음 (checkProjectEditPermission = true)`
+    `교통정책과 김교통 담당자가 소관 4-01(9호선 조기착공) 사업 수정 권한을 정상 승인받음 (checkProjectEditPermission = true)`
   );
 
   // 2. 다른 부서의 사업은 URL이나 API 직접 접근으로도 수정할 수 없는가?

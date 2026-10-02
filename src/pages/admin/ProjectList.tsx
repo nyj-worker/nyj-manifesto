@@ -19,6 +19,8 @@ import {
   ExternalLink
 } from 'lucide-react';
 
+import { getClientProjects, getClientProjectById } from '../../services/clientStorage.ts';
+
 interface ProjectListProps {
   onNavigate: (tab: string, projectId?: string) => void;
   initialSelectedId?: string;
@@ -59,9 +61,16 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onNavigate, initialSel
         } else if (data.projects.length > 0) {
           loadProjectDetail(data.projects[0].id);
         }
+      } else {
+        const clientProjs = getClientProjects();
+        setProjects(clientProjs);
+        if (clientProjs.length > 0) loadProjectDetail(clientProjs[0].id);
       }
     } catch (err) {
-      console.error('공약사업 목록 로드 오류:', err);
+      console.warn('공약사업 목록 로드 오류, 클라이언트 스토리지로 복구합니다:', err);
+      const clientProjs = getClientProjects();
+      setProjects(clientProjs);
+      if (clientProjs.length > 0) loadProjectDetail(clientProjs[0].id);
     } finally {
       setLoading(false);
     }
