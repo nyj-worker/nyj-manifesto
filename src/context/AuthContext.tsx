@@ -115,6 +115,30 @@ async function handleClientFallback(url: string, options: RequestInit = {}, curr
     });
   }
 
+  // 10. 쉬운말 AI 질문 응답 (클라이언트 전용)
+  if (cleanUrl === '/api/ai/custom-ask' && method === 'POST') {
+    let question = '';
+    try {
+      if (options.body) {
+        const parsed = JSON.parse(options.body as string);
+        question = parsed.question || '';
+      }
+    } catch {}
+
+    const answer = `[남양주시 민선9기 공약 AI 알리미]\n질문하신 "${question}" 관련 핵심 공약사항을 안내해 드립니다.\n\n• 추진 배경: 남양주시민의 교통 편익과 삶의 질 향상을 위해 민선9기 중점 과제로 선정되어 적극 추진되고 있습니다.\n• 진행 현황: 2026년 현재 기본계획 및 사전 인허가 절차가 정상추진 중이며, 분기별 이행 점검을 철저히 진행하고 있습니다.\n• 기대 효과: 사업이 완료되면 서울 접근성 개선 및 지역 주민의 통근 시간이 획기적으로 단축될 것으로 기대됩니다.`;
+
+    return new Response(JSON.stringify({
+      answer,
+      references: [
+        { manageNo: '4-01', title: '9호선 조기 착공 및 적기 개통' },
+        { manageNo: '4-14', title: '남양주형 똑버스(DRT) 확대 도입' }
+      ]
+    }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
   // 기본 성공 응답
   return new Response(JSON.stringify({ success: true }), {
     status: 200,
@@ -158,7 +182,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
   const [users, setUsers] = useState<User[]>([defaultCitizen]);
   const [portalMode, setPortalMode] = useState<'admin' | 'public'>(() => {
-    return (localStorage.getItem('portal_mode') as 'admin' | 'public') || 'admin';
+    // 처음 접속하거나 저장값이 없으면 무조건 'public' (시민 공개 대시보드)으로 시작
+    return (localStorage.getItem('portal_mode') as 'admin' | 'public') || 'public';
   });
 
   // 서버에서 데모 사용자 목록 로드

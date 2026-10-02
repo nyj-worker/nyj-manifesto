@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext.tsx';
 import { PublicProjectView } from '../../types/index.ts';
 import { StatusBadge } from '../../components/common/StatusBadge.tsx';
 import {
@@ -21,6 +22,7 @@ interface PublicDetailProps {
 }
 
 export const PublicDetail: React.FC<PublicDetailProps> = ({ projectId, onNavigate }) => {
+  const { apiFetch } = useAuth();
   const [project, setProject] = useState<PublicProjectView | null>(null);
   const [loading, setLoading] = useState(true);
   const [activePhotoTab, setActivePhotoTab] = useState<'after' | 'before' | 'plan'>('after');
@@ -32,7 +34,7 @@ export const PublicDetail: React.FC<PublicDetailProps> = ({ projectId, onNavigat
   const loadDetail = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`/api/public/projects/${projectId}`);
+      const res = await apiFetch(`/api/public/projects/${projectId}`);
       if (res.ok) {
         const data = await res.json();
         setProject(data.project);

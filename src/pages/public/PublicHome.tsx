@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext.tsx';
 import { PublicProjectView } from '../../types/index.ts';
 import { StatusBadge } from '../../components/common/StatusBadge.tsx';
 import {
@@ -18,6 +19,7 @@ interface PublicHomeProps {
 }
 
 export const PublicHome: React.FC<PublicHomeProps> = ({ onNavigate }) => {
+  const { apiFetch } = useAuth();
   const [stats, setStats] = useState<any>(null);
   const [recentProjects, setRecentProjects] = useState<PublicProjectView[]>([]);
   const [loading, setLoading] = useState(true);
@@ -30,8 +32,8 @@ export const PublicHome: React.FC<PublicHomeProps> = ({ onNavigate }) => {
     try {
       setLoading(true);
       const [statsRes, projectsRes] = await Promise.all([
-        fetch('/api/public/stats'),
-        fetch('/api/public/projects')
+        apiFetch('/api/public/stats'),
+        apiFetch('/api/public/projects')
       ]);
 
       if (statsRes.ok) {
@@ -40,7 +42,9 @@ export const PublicHome: React.FC<PublicHomeProps> = ({ onNavigate }) => {
       }
       if (projectsRes.ok) {
         const projData = await projectsRes.json();
-        setRecentProjects(projData.projects.slice(0, 4));
+        if (projData.projects) {
+          setRecentProjects(projData.projects.slice(0, 4));
+        }
       }
     } catch (err) {
       console.error('시민 데이터 로드 오류:', err);

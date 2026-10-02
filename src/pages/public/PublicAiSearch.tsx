@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useAuth } from '../../context/AuthContext.tsx';
 import { Sparkles, Send, MapPin, Tag, ArrowRight, ShieldCheck, HelpCircle } from 'lucide-react';
 import { StatusBadge } from '../../components/common/StatusBadge.tsx';
 
@@ -7,6 +8,7 @@ interface PublicAiSearchProps {
 }
 
 export const PublicAiSearch: React.FC<PublicAiSearchProps> = ({ onNavigate }) => {
+  const { apiFetch } = useAuth();
   const [question, setQuestion] = useState('');
   const [selectedDong, setSelectedDong] = useState('전체');
   const [selectedTopic, setSelectedTopic] = useState('전체');
@@ -26,7 +28,7 @@ export const PublicAiSearch: React.FC<PublicAiSearchProps> = ({ onNavigate }) =>
 
     try {
       setLoading(true);
-      const res = await fetch('/api/ai/custom-ask', {
+      const res = await apiFetch('/api/ai/custom-ask', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext.tsx';
 import { PublicProjectView } from '../../types/index.ts';
 import { PublicMap } from '../../components/map/PublicMap.tsx';
 import { StatusBadge } from '../../components/common/StatusBadge.tsx';
@@ -19,6 +20,7 @@ interface PublicMapPageProps {
 }
 
 export const PublicMapPage: React.FC<PublicMapPageProps> = ({ onNavigate }) => {
+  const { apiFetch } = useAuth();
   const [projects, setProjects] = useState<PublicProjectView[]>([]);
   const [mappedProjects, setMappedProjects] = useState<PublicProjectView[]>([]);
   const [cityWideProjects, setCityWideProjects] = useState<PublicProjectView[]>([]);
@@ -46,7 +48,7 @@ export const PublicMapPage: React.FC<PublicMapPageProps> = ({ onNavigate }) => {
         url += `&lat=${userLocation[0]}&lng=${userLocation[1]}&radius=${selectedRadius}`;
       }
 
-      const res = await fetch(url);
+      const res = await apiFetch(url);
       if (res.ok) {
         const data = await res.json();
         setProjects(data.projects || []);

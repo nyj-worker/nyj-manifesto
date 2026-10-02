@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext.tsx';
 import { PublicProjectView } from '../../types/index.ts';
 import { StatusBadge } from '../../components/common/StatusBadge.tsx';
 import { Search, Filter, ArrowRight, MapPin, Calendar, CheckCircle } from 'lucide-react';
@@ -8,6 +9,7 @@ interface PublicListProps {
 }
 
 export const PublicList: React.FC<PublicListProps> = ({ onNavigate }) => {
+  const { apiFetch } = useAuth();
   const [projects, setProjects] = useState<PublicProjectView[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDong, setSelectedDong] = useState('전체');
@@ -22,7 +24,7 @@ export const PublicList: React.FC<PublicListProps> = ({ onNavigate }) => {
     try {
       setLoading(true);
       let url = `/api/public/projects?dong=${encodeURIComponent(selectedDong)}&status=${encodeURIComponent(selectedStatus)}`;
-      const res = await fetch(url);
+      const res = await apiFetch(url);
       if (res.ok) {
         const data = await res.json();
         setProjects(data.projects || []);

@@ -44,7 +44,7 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({
             <div className="h-6 w-px bg-white/20"></div>
             <div>
               <p className="text-slate-400">제공 데이터</p>
-              <p className="font-semibold text-emerald-300">공식 승인 확정 자료</p>
+              <p className="font-semibold text-emerald-300">시연용 데모자료</p>
             </div>
           </div>
         </div>
