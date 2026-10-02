@@ -14,6 +14,7 @@ import {
   Building,
   CheckCircle2
 } from 'lucide-react';
+import { getClientPublicProjects } from '../../services/clientStorage.ts';
 
 interface PublicMapPageProps {
   onNavigate: (tab: string, projectId?: string) => void;
@@ -21,11 +22,18 @@ interface PublicMapPageProps {
 
 export const PublicMapPage: React.FC<PublicMapPageProps> = ({ onNavigate }) => {
   const { apiFetch } = useAuth();
-  const [projects, setProjects] = useState<PublicProjectView[]>([]);
-  const [mappedProjects, setMappedProjects] = useState<PublicProjectView[]>([]);
-  const [cityWideProjects, setCityWideProjects] = useState<PublicProjectView[]>([]);
-  const [selectedProject, setSelectedProject] = useState<PublicProjectView | null>(null);
-  const [loading, setLoading] = useState(true);
+  
+  // 첫 렌더링 즉시 안전하게 표시될 기본 데이터 주입
+  const [initialFallback] = useState(() => getClientPublicProjects());
+  const [projects, setProjects] = useState<PublicProjectView[]>(() => initialFallback.projects || []);
+  const [mappedProjects, setMappedProjects] = useState<PublicProjectView[]>(() => initialFallback.mappedProjects || []);
+  const [cityWideProjects, setCityWideProjects] = useState<PublicProjectView[]>(() => initialFallback.cityWideProjects || []);
+  const [selectedProject, setSelectedProject] = useState<PublicProjectView | null>(() => {
+    return initialFallback.mappedProjects && initialFallback.mappedProjects.length > 0 
+      ? initialFallback.mappedProjects[0] 
+      : null;
+  });
+  const [loading, setLoading] = useState(false);
 
   // 필터 및 위치 상태
   const [selectedDong, setSelectedDong] = useState('전체');

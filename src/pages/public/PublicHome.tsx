@@ -13,6 +13,7 @@ import {
   Calendar,
   Layers
 } from 'lucide-react';
+import { getClientPublicStats, getClientPublicProjects } from '../../services/clientStorage.ts';
 
 interface PublicHomeProps {
   onNavigate: (tab: string, projectId?: string) => void;
@@ -20,9 +21,12 @@ interface PublicHomeProps {
 
 export const PublicHome: React.FC<PublicHomeProps> = ({ onNavigate }) => {
   const { apiFetch } = useAuth();
-  const [stats, setStats] = useState<any>(null);
-  const [recentProjects, setRecentProjects] = useState<PublicProjectView[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<any>(() => getClientPublicStats());
+  const [recentProjects, setRecentProjects] = useState<PublicProjectView[]>(() => {
+    const data = getClientPublicProjects();
+    return data.projects ? data.projects.slice(0, 4) : [];
+  });
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     loadPublicData();

@@ -73,23 +73,53 @@ function toPublicProjectView(p: PromiseProject): PublicProjectView {
 }
 
 /**
- * 클라이언트 로컬스토리지 저장소 초기화
+ * 클라이언트 로컬스토리지 저장소 초기화 (자가 복구 기능 내장)
  */
-export function initClientStorage() {
-  if (!localStorage.getItem(STORAGE_KEYS.PROJECTS)) {
+export function initClientStorage(force = false) {
+  // 1. 내부 관리용 프로젝트 목록
+  const projsRaw = localStorage.getItem(STORAGE_KEYS.PROJECTS);
+  let needProjs = force || !projsRaw || projsRaw === '[]';
+  if (!needProjs && projsRaw) {
+    try {
+      const parsed = JSON.parse(projsRaw);
+      if (!Array.isArray(parsed) || parsed.length === 0) needProjs = true;
+    } catch {
+      needProjs = true;
+    }
+  }
+  if (needProjs) {
     localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(SEED_PROJECTS));
   }
-  if (!localStorage.getItem(STORAGE_KEYS.USERS)) {
+
+  // 2. 사용자 목록
+  const usersRaw = localStorage.getItem(STORAGE_KEYS.USERS);
+  let needUsers = force || !usersRaw || usersRaw === '[]';
+  if (needUsers) {
     localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(SEED_USERS));
   }
-  if (!localStorage.getItem(STORAGE_KEYS.PUBLIC_PROJECTS)) {
+
+  // 3. 시민 공개용 프로젝트 목록 (핵심: 빈 배열인 경우 즉시 12개 공개 공약으로 자동 복구)
+  const publicRaw = localStorage.getItem(STORAGE_KEYS.PUBLIC_PROJECTS);
+  let needPublic = force || !publicRaw || publicRaw === '[]';
+  if (!needPublic && publicRaw) {
+    try {
+      const parsed = JSON.parse(publicRaw);
+      if (!Array.isArray(parsed) || parsed.length === 0) needPublic = true;
+    } catch {
+      needPublic = true;
+    }
+  }
+  if (needPublic) {
     const published = SEED_PROJECTS.filter(p => p.publicStatus === '게시').map(toPublicProjectView);
     localStorage.setItem(STORAGE_KEYS.PUBLIC_PROJECTS, JSON.stringify(published));
   }
+
+  // 4. 이력 및 감사 로그
   if (!localStorage.getItem(STORAGE_KEYS.HISTORY)) {
     localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify([]));
   }
-  if (!localStorage.getItem(STORAGE_KEYS.AUDIT_LOGS)) {
+  const auditRaw = localStorage.getItem(STORAGE_KEYS.AUDIT_LOGS);
+  if (!auditRaw || auditRaw === '[]') {
     localStorage.setItem(
       STORAGE_KEYS.AUDIT_LOGS,
       JSON.stringify([
@@ -443,10 +473,17 @@ export function getClientPublicStats() {
   };
 }
 
-export function getClientPublicProjects() {
+export function getClientPublicProjects(dong?: string, status?: string) {
   initClientStorage();
   const raw = localStorage.getItem(STORAGE_KEYS.PUBLIC_PROJECTS);
-  const projects: PublicProjectView[] = raw ? JSON.parse(raw) : [];
+  let projects: PublicProjectView[] = raw ? JSON.parse(raw) : [];
+
+  if (dong && dong !== '전체') {
+    projects = projects.filter(p => p.location.dong === dong || p.location.type === '시전체');
+  }
+  if (status && status !== '전체') {
+    projects = projects.filter(p => p.executionStatus === status);
+  }
 
   const mappedProjects = projects.filter(p => p.location.lat && p.location.lng && p.location.type !== '시전체');
   const cityWideProjects = projects.filter(p => !p.location.lat || !p.location.lng || p.location.type === '시전체');

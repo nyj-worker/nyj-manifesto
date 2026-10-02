@@ -98,7 +98,11 @@ async function handleClientFallback(url: string, options: RequestInit = {}, curr
 
   // 8. 시민 공개 프로젝트 목록
   if (cleanUrl === '/api/public/projects' && method === 'GET') {
-    const result = getClientPublicProjects();
+    const queryStr = url.includes('?') ? url.split('?')[1] : '';
+    const searchParams = new URLSearchParams(queryStr);
+    const dong = searchParams.get('dong') || undefined;
+    const status = searchParams.get('status') || undefined;
+    const result = getClientPublicProjects(dong, status);
     return new Response(JSON.stringify(result), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
