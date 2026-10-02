@@ -22,21 +22,21 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
       {/* 시민 포털 비주얼 헤더 */}
-      <div className="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white py-8 px-4 sm:px-6 lg:px-8 shadow-md">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white py-5 sm:py-8 px-3 sm:px-6 lg:px-8 shadow-md">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-3 sm:gap-4">
           <div>
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-500/30 text-blue-200 text-xs font-semibold mb-2 border border-blue-400/30">
-              <Sparkles className="w-3.5 h-3.5 text-amber-300" /> 투명하고 알기 쉬운 시민 소통
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:py-1 rounded-full bg-blue-500/30 text-blue-200 text-[11px] sm:text-xs font-semibold mb-1.5 sm:mb-2 border border-blue-400/30">
+              <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-300" /> 투명하고 알기 쉬운 시민 소통
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-tight leading-tight">
               남양주시 민선9기 시민 공약 대시보드
             </h2>
-            <p className="text-slate-300 text-sm mt-1">
+            <p className="text-slate-300 text-xs sm:text-sm mt-1 leading-relaxed">
               시민과의 약속을 투명하게 공개하고, 우리 동네 사업의 추진 과정을 지도와 쉬운말로 안내합니다.
             </p>
           </div>
 
-          <div className="flex items-center gap-3 text-xs text-slate-300 bg-white/10 px-4 py-2.5 rounded-xl backdrop-blur-xs border border-white/15">
+          <div className="flex items-center gap-3 text-[11px] sm:text-xs text-slate-300 bg-white/10 px-3 py-2 rounded-xl backdrop-blur-xs border border-white/15 w-fit">
             <div>
               <p className="text-slate-400">데이터 기준일</p>
               <p className="font-semibold text-white">2026년 9월 30일 기준</p>
@@ -49,8 +49,8 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({
           </div>
         </div>
 
-        {/* 탭 네비게이션 */}
-        <div className="max-w-7xl mx-auto mt-6 pt-4 border-t border-white/10 flex space-x-2 sm:space-x-4 overflow-x-auto">
+        {/* 탭 네비게이션 (모바일 가로 스와이프 지원 및 스크롤바 숨김) */}
+        <div className="max-w-7xl mx-auto mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-white/10 flex space-x-1.5 sm:space-x-4 overflow-x-auto no-scrollbar">
           {navItems.map(item => {
             const Icon = item.icon;
             const isActive = currentTab === item.id;
@@ -58,13 +58,13 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({
               <button
                 key={item.id}
                 onClick={() => onTabChange(item.id)}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${
+                className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap shrink-0 transition-all ${
                   isActive
                     ? 'bg-white text-blue-900 font-bold shadow-lg scale-102'
                     : 'text-slate-200 hover:text-white hover:bg-white/10'
                 }`}
               >
-                <Icon className={`w-4 h-4 ${isActive ? 'text-blue-700' : 'text-slate-300'}`} />
+                <Icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isActive ? 'text-blue-700' : 'text-slate-300'}`} />
                 <span>{item.label}</span>
               </button>
             );
