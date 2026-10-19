@@ -21,6 +21,7 @@ import { PublicMapPage } from './pages/public/PublicMapPage.tsx';
 import { PublicList } from './pages/public/PublicList.tsx';
 import { PublicDetail } from './pages/public/PublicDetail.tsx';
 import { PublicAiSearch } from './pages/public/PublicAiSearch.tsx';
+import { PublicDetailModal } from './components/common/PublicDetailModal.tsx';
 
 const AppContent: React.FC = () => {
   const { portalMode, currentUser, apiFetch } = useAuth();
@@ -33,6 +34,10 @@ const AppContent: React.FC = () => {
   // 시민 공개 포털 탭
   const [publicTab, setPublicTab] = useState<string>('public-home');
   const [publicSelectedProjectId, setPublicSelectedProjectId] = useState<string>('proj_4_01');
+
+  // 공약 상세 인터랙티브 모달 상태 (전체화면 및 확대/축소 지원)
+  const [modalProjectId, setModalProjectId] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   // 전환 완료 피드백 알림 배너 상태
   const [noticeMessage, setNoticeMessage] = useState<string | null>(null);
@@ -57,6 +62,12 @@ const AppContent: React.FC = () => {
   };
 
   const handlePublicNavigate = (tab: string, projectId?: string) => {
+    // 공약 상세 요청 시 모달 팝업으로 즉시 표시 (화면 이동 없이 모달창 오픈)
+    if (tab === 'public-detail' && projectId) {
+      setModalProjectId(projectId);
+      setIsModalOpen(true);
+      return;
+    }
     setPublicTab(tab);
     if (projectId) setPublicSelectedProjectId(projectId);
   };
@@ -139,6 +150,13 @@ const AppContent: React.FC = () => {
           {publicTab === 'public-ai' && <PublicAiSearch onNavigate={handlePublicNavigate} />}
         </PublicLayout>
       )}
+
+      {/* 4. 공약 상세 인터랙티브 모달 (전체화면 및 확대/축소 기능 내장) */}
+      <PublicDetailModal
+        projectId={modalProjectId}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
     </div>
   );
 };
