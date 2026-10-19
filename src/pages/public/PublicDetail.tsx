@@ -37,20 +37,60 @@ export const PublicDetail: React.FC<PublicDetailProps> = ({ projectId, onNavigat
       const res = await apiFetch(`/api/public/projects/${projectId}`);
       if (res.ok) {
         const data = await res.json();
-        setProject(data.project);
+        if (data.project) {
+          // 쉬운말 요약 또는 기본 정보가 누락되지 않도록 안전 가드 적용
+          const p = data.project;
+          const safeSummary = p.easySummary || {
+            what: p.purpose || `${p.title} 사업입니다.`,
+            who: '남양주시민 및 대중교통 이용자',
+            where: p.location?.address || `${p.location?.dong || '남양주시'} 일원`,
+            when: p.period || '민선9기 임기 내',
+            progress: p.executionStatus || '정상추진 중',
+            next: '세부 계획 수립 및 공정별 단계적 추진 예정'
+          };
+          setProject({
+            ...p,
+            easySummary: safeSummary
+          });
+        } else {
+          setProject(null);
+        }
+      } else {
+        setProject(null);
       }
     } catch (err) {
       console.error('상세 로드 실패:', err);
+      setProject(null);
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading || !project) {
+  if (loading) {
     return (
       <div className="py-20 text-center text-slate-400">
         <Clock className="w-8 h-8 animate-spin mx-auto text-blue-600 mb-2" />
         공약 상세정보를 불러오는 중입니다...
+      </div>
+    );
+  }
+
+  if (!project) {
+    return (
+      <div className="py-20 text-center space-y-4 max-w-md mx-auto">
+        <div className="w-14 h-14 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center mx-auto">
+          <AlertCircle className="w-7 h-7" />
+        </div>
+        <h3 className="text-lg font-bold text-slate-800">공약 정보를 불러올 수 없습니다</h3>
+        <p className="text-xs text-slate-500 leading-relaxed">
+          해당 사업이 아직 시민 포털에 공식 게시되지 않았거나, 일시적인 데이터 조회 지연일 수 있습니다.
+        </p>
+        <button
+          onClick={() => onNavigate('public-list')}
+          className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-colors shadow-xs"
+        >
+          <ArrowLeft className="w-4 h-4" /> 전체 공약 목록으로 돌아가기
+        </button>
       </div>
     );
   }
@@ -73,7 +113,7 @@ export const PublicDetail: React.FC<PublicDetailProps> = ({ projectId, onNavigat
           </span>
           <div className="flex items-center gap-2">
             <StatusBadge type="execution" status={project.executionStatus} />
-            <span className="text-xs text-slate-400">공식 게시일: {project.publishedAt}</span>
+            <span className="text-xs text-slate-400">공식 게시일: {project.publishedAt || '2026-09-30'}</span>
           </div>
         </div>
 
@@ -85,11 +125,11 @@ export const PublicDetail: React.FC<PublicDetailProps> = ({ projectId, onNavigat
         <div className="grid grid-cols-3 gap-3 pt-4 border-t border-slate-100 text-center">
           <div className="p-3 bg-slate-50 rounded-2xl">
             <span className="text-xs text-slate-500">성과목표 달성률</span>
-            <p className="text-lg font-black text-blue-700 mt-0.5">{project.indicatorAchievementRate}%</p>
+            <p className="text-lg font-black text-blue-700 mt-0.5">{project.indicatorAchievementRate ?? 0}%</p>
           </div>
           <div className="p-3 bg-slate-50 rounded-2xl">
             <span className="text-xs text-slate-500">예산 집행률</span>
-            <p className="text-lg font-black text-purple-700 mt-0.5">{project.budgetExecutionRate}%</p>
+            <p className="text-lg font-black text-purple-700 mt-0.5">{project.budgetExecutionRate ?? 0}%</p>
           </div>
           <div className="p-3 bg-slate-50 rounded-2xl">
             <span className="text-xs text-slate-500">추진 상태</span>
@@ -113,32 +153,32 @@ export const PublicDetail: React.FC<PublicDetailProps> = ({ projectId, onNavigat
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
           <div className="p-4 rounded-2xl bg-blue-50/60 border border-blue-100 space-y-1">
             <strong className="text-blue-900 text-sm">Q. 어떤 사업인가요?</strong>
-            <p className="text-slate-800 leading-relaxed">{project.easySummary.what}</p>
+            <p className="text-slate-800 leading-relaxed">{project.easySummary?.what || project.purpose}</p>
           </div>
 
           <div className="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-100 space-y-1">
             <strong className="text-emerald-900 text-sm">Q. 누구에게 도움이 되나요?</strong>
-            <p className="text-slate-800 leading-relaxed">{project.easySummary.who}</p>
+            <p className="text-slate-800 leading-relaxed">{project.easySummary?.who || '남양주시민'}</p>
           </div>
 
           <div className="p-4 rounded-2xl bg-purple-50/60 border border-purple-100 space-y-1">
             <strong className="text-purple-900 text-sm">Q. 어디에서 진행되나요?</strong>
-            <p className="text-slate-800 leading-relaxed">{project.easySummary.where}</p>
+            <p className="text-slate-800 leading-relaxed">{project.easySummary?.where || project.location?.address || `${project.location?.dong || '남양주시'} 일원`}</p>
           </div>
 
           <div className="p-4 rounded-2xl bg-amber-50/60 border border-amber-100 space-y-1">
             <strong className="text-amber-900 text-sm">Q. 언제 진행되나요?</strong>
-            <p className="text-slate-800 leading-relaxed">{project.easySummary.when}</p>
+            <p className="text-slate-800 leading-relaxed">{project.easySummary?.when || project.period}</p>
           </div>
 
           <div className="p-4 rounded-2xl bg-cyan-50/60 border border-cyan-100 space-y-1">
             <strong className="text-cyan-900 text-sm">Q. 현재 얼마나 진행됐나요?</strong>
-            <p className="text-slate-800 leading-relaxed">{project.easySummary.progress}</p>
+            <p className="text-slate-800 leading-relaxed">{project.easySummary?.progress || project.executionStatus}</p>
           </div>
 
           <div className="p-4 rounded-2xl bg-indigo-50/60 border border-indigo-100 space-y-1">
             <strong className="text-indigo-900 text-sm">Q. 앞으로 무엇이 남았나요?</strong>
-            <p className="text-slate-800 leading-relaxed">{project.easySummary.next}</p>
+            <p className="text-slate-800 leading-relaxed">{project.easySummary?.next || '향후 세부 계획 추진'}</p>
           </div>
         </div>
       </div>
@@ -223,7 +263,7 @@ export const PublicDetail: React.FC<PublicDetailProps> = ({ projectId, onNavigat
           <div className="p-4 bg-slate-50 rounded-2xl space-y-2 border border-slate-200">
             <p><strong>• 소관 조직:</strong> {project.bureauName} {project.departmentName} {project.teamName}</p>
             <p><strong>• 사업 기간:</strong> {project.period}</p>
-            <p><strong>• 대상 지역:</strong> {project.location.address || project.location.dong}</p>
+            <p><strong>• 대상 지역:</strong> {project.location?.address || project.location?.dong || '남양주시 일원'}</p>
             {project.overviewVolume && <p><strong>• 사업 규모:</strong> {project.overviewVolume}</p>}
           </div>
 

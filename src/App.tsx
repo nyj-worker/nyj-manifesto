@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext.tsx';
+import { ErrorBoundary } from './components/common/ErrorBoundary.tsx';
 import { RoleSwitcher } from './components/common/RoleSwitcher.tsx';
 import { Header } from './components/layout/Header.tsx';
 import { AdminLayout } from './components/layout/AdminLayout.tsx';
@@ -144,8 +145,10 @@ const AppContent: React.FC = () => {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }
