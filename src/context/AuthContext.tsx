@@ -9,6 +9,7 @@ import {
   getClientPublicStats,
   getClientPublicProjects,
   getClientPublicProjectById,
+  answerClientAiQuestion,
   getClientAuditLogs,
   initClientStorage
 } from '../services/clientStorage.ts';
@@ -126,25 +127,23 @@ async function handleClientFallback(url: string, options: RequestInit = {}, curr
     });
   }
 
-  // 10. 쉬운말 AI 질문 응답 (클라이언트 전용)
+  // 10. 쉬운말 AI 질문 응답 (클라이언트 전용 자연어 매칭 엔진)
   if (cleanUrl === '/api/ai/custom-ask' && method === 'POST') {
     let question = '';
+    let dong = '전체';
+    let topic = '전체';
     try {
       if (options.body) {
         const parsed = JSON.parse(options.body as string);
         question = parsed.question || '';
+        dong = parsed.dong || '전체';
+        topic = parsed.topic || '전체';
       }
     } catch {}
 
-    const answer = `[남양주시 민선9기 공약 AI 알리미]\n질문하신 "${question}" 관련 핵심 공약사항을 안내해 드립니다.\n\n• 추진 배경: 남양주시민의 교통 편익과 삶의 질 향상을 위해 민선9기 중점 과제로 선정되어 적극 추진되고 있습니다.\n• 진행 현황: 2026년 현재 기본계획 및 사전 인허가 절차가 정상추진 중이며, 분기별 이행 점검을 철저히 진행하고 있습니다.\n• 기대 효과: 사업이 완료되면 서울 접근성 개선 및 지역 주민의 통근 시간이 획기적으로 단축될 것으로 기대됩니다.`;
+    const aiResult = answerClientAiQuestion(question, dong, topic);
 
-    return new Response(JSON.stringify({
-      answer,
-      references: [
-        { manageNo: '4-01', title: '9호선 조기 착공 및 적기 개통' },
-        { manageNo: '4-14', title: '남양주형 똑버스(DRT) 확대 도입' }
-      ]
-    }), {
+    return new Response(JSON.stringify(aiResult), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
