@@ -243,7 +243,7 @@ export const PublicDetail: React.FC<PublicDetailProps> = ({ projectId, onNavigat
               />
             </div>
             <p className="text-xs text-slate-500 text-center">
-              📷 {project.photos.caption || `${project.title} 공식 제공 사진`} (공식 승인 자료)
+              📷 {project.photos.caption || `${project.title} 공식 제공 사진`} (데모 자료)
             </p>
           </div>
         ) : (
