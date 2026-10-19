@@ -8,6 +8,7 @@ import {
   transitionClientProject,
   getClientPublicStats,
   getClientPublicProjects,
+  getClientPublicProjectById,
   getClientAuditLogs,
   initClientStorage
 } from '../services/clientStorage.ts';
@@ -109,10 +110,16 @@ async function handleClientFallback(url: string, options: RequestInit = {}, curr
     });
   }
 
-  // 9. 시민 공약 상세
+  // 9. 시민 공약 상세 (6하원칙 쉬운말 요약 및 지표 보장)
   if (cleanUrl.startsWith('/api/public/projects/') && method === 'GET') {
     const id = cleanUrl.replace('/api/public/projects/', '');
-    const { project } = getClientProjectById(id);
+    const project = getClientPublicProjectById(id);
+    if (!project) {
+      return new Response(JSON.stringify({ error: '게시된 공개 공약사업을 찾을 수 없습니다.' }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
     return new Response(JSON.stringify({ project }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }

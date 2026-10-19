@@ -39,7 +39,7 @@ function createEasySummary(project: PromiseProject): PublicProjectView['easySumm
 /**
  * 프로젝트를 시민 공개용 구조로 변환
  */
-function toPublicProjectView(p: PromiseProject): PublicProjectView {
+export function toPublicProjectView(p: PromiseProject): PublicProjectView {
   const easy = createEasySummary(p);
   const achRate = p.indicators && p.indicators.length > 0 ? p.indicators[0].achievementRate : 0;
   const totalBud = p.investmentPlan.totalBudget || 1;
@@ -495,3 +495,34 @@ export function getClientPublicProjects(dong?: string, status?: string) {
     cityWideProjects
   };
 }
+
+/**
+ * 시민 공개용 공약사업 단건 조회 (6하원칙 쉬운말 해설 및 지표 보장)
+ */
+export function getClientPublicProjectById(id: string): PublicProjectView | null {
+  initClientStorage();
+
+  // 1. 이미 공개 저장소에 저장된 프로젝트 목록에서 검색 (id 또는 manageNo)
+  const raw = localStorage.getItem(STORAGE_KEYS.PUBLIC_PROJECTS);
+  const publicList: PublicProjectView[] = raw ? JSON.parse(raw) : [];
+  const foundInPublic = publicList.find(p => p.id === id || p.manageNo === id);
+  if (foundInPublic && foundInPublic.easySummary) {
+    return foundInPublic;
+  }
+
+  // 2. 내부 행정 프로젝트 저장소에서 검색 후 시민 공개용 구조(PublicProjectView)로 변환
+  const adminProjects = getClientProjects();
+  const rawProject = adminProjects.find(p => p.id === id || p.manageNo === id);
+  if (rawProject) {
+    return toPublicProjectView(rawProject);
+  }
+
+  // 3. 시드(기본) 데이터에서 검색 후 시민 공개용 구조로 변환
+  const seedProject = SEED_PROJECTS.find(p => p.id === id || p.manageNo === id);
+  if (seedProject) {
+    return toPublicProjectView(seedProject);
+  }
+
+  return null;
+}
+
